@@ -12,6 +12,10 @@ class MessageHandler {
     };
   }
 
+  setOccurrenceListener(event, cb) {
+    //this.handlers['']
+  }
+
   parseBuffer(buffer) {
     return JSON.parse(buffer.toString('utf-8'));
   }
