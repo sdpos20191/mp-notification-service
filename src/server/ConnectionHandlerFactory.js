@@ -4,9 +4,9 @@ import Client from 'network/Client';
 import ConnectionHandler from 'server/ConnectionHandler';
 
 class ConnectionHandlerFactory {
-  constructor(queue, handler) {
+  constructor(queue, loggerFactory) {
     this.queue = queue;
-    this.handler = handler;
+    this.loggerFactory = loggerFactory;
   }
 
   create(socket) {
@@ -16,7 +16,8 @@ class ConnectionHandlerFactory {
     return new ConnectionHandler(
       id,
       client,
-      this.handler,
+      this.queue,
+      this.loggerFactory.create('ConnectionHandler'),
     );
   }
 }

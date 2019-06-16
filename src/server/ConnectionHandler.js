@@ -1,25 +1,19 @@
 import _ from 'lodash';
 
 class ConnectionHandler {
-  constructor(id, client, handler) {
+  constructor(id, client, queue, logger) {
     this.id = id;
     this.client = client;
-    this.handler = handler;
+    this.queue = queue;
+    this.logger = logger;
   }
 
   async start() {
-    this.handler.setOccurrenceListener('occurrence', this.onOccurrenceMessage.bind(this));
-    // this.client.on('message', this.onClientMessage.bind(this));
     this.client.on('close', this.onClientClose.bind(this));
     this.client.on('error', this.onClientError.bind(this));
-    setInterval(this.onOccurrenceMessage.bind(this), 3000, "oi");
-  }
-
-  getHandler(type) {
-    if (!this.handlers[type]) {
-      throw new Error(`Unknown event type '${type}'`);
-    }
-    return this.handlers[type];
+    this.channel = await this.queue.start();
+    this.queue.onQueueMessage('ocorrencias', this.onQueueMessage.bind(this));
+    // setInterval(this.onOccurrenceMessage.bind(this), 3000, "oi");
   }
 
   onClientClose(code, reason) {
@@ -31,16 +25,25 @@ class ConnectionHandler {
     console.error(error);
   }
 
-  onOccurrenceMessage(message) {
-    console.log(`Forwarding message ${message} to WS client...`);
-    // this.logger.info(`Forwarding '${event.type}' sent by '${event.data.from}'`);
-    const date = new Date();
-    const data = {
-        timestamp: date.getDate(),
-        lat: '478.234',
-        lng: '7895.435'
-    }
-    this.client.send('occurrence', data);
+  parseBuffer(buffer) {
+    return JSON.parse(buffer.toString('utf-8'));
+  }
+
+  onQueueMessage(msg) {
+      console.log(msg);
+      const { content, fields } = msg;
+      const data = this.parseBuffer(content);
+      const { routingKey } = fields;
+
+      this.logger.debug(`Receive message ${routingKey}`);
+      this.logger.debug(JSON.stringify(data));
+      try {
+        this.client.send('occurrence', data);
+        this.channel.ack(msg);
+      } catch (err) {
+        this.logger.error(err.stack);
+        this.channel.nack(msg);
+      }
   }
 }
 

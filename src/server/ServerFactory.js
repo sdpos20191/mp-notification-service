@@ -2,15 +2,14 @@ import Server from 'server/Server';
 import ConnectionHandlerFactory from 'server/ConnectionHandlerFactory';
 
 class ServerFactory {
-  constructor(port, queue, handler, loggerFactory) {
+  constructor(port, queue, loggerFactory) {
     this.port = port;
     this.queue = queue;
-    this.handler = handler;
     this.loggerFactory = loggerFactory;
   }
 
   create() {
-    const connectionHandlerFactory = new ConnectionHandlerFactory(this.queue, this.handler);
+    const connectionHandlerFactory = new ConnectionHandlerFactory(this.queue, this.loggerFactory);
 
     return new Server(
       this.port,
