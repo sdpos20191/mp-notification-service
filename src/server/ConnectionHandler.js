@@ -12,13 +12,11 @@ class ConnectionHandler {
     this.client.on('close', this.onClientClose.bind(this));
     this.client.on('error', this.onClientError.bind(this));
     this.channel = await this.queue.start();
-    this.queue.onQueueMessage('ocorrencias', this.onQueueMessage.bind(this));
-    // setInterval(this.onOccurrenceMessage.bind(this), 3000, "oi");
+    this.queue.onQueueMessage('ocorrencias-queue', this.onQueueMessage.bind(this));
   }
 
   onClientClose(code, reason) {
     console.error(code, reason)
-    // this.cloud.close();
   }
 
   onClientError(error) {
@@ -30,14 +28,14 @@ class ConnectionHandler {
   }
 
   onQueueMessage(msg) {
-      console.log(msg);
-      const { content, fields } = msg;
-      const data = this.parseBuffer(content);
-      const { routingKey } = fields;
-
-      this.logger.debug(`Receive message ${routingKey}`);
-      this.logger.debug(JSON.stringify(data));
       try {
+        const { content, fields } = msg;
+        const data = this.parseBuffer(content);
+        const { routingKey } = fields;
+
+        this.logger.debug(`Receive message ${routingKey}`);
+        this.logger.debug(JSON.stringify(data));
+
         this.client.send('occurrence', data);
         this.channel.ack(msg);
       } catch (err) {
