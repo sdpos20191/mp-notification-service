@@ -20,6 +20,7 @@
   "scripts": {
     "lint": "eslint src",
     "prepublishOnly": "npm run build",
+    "start": "node build",
     "start:watch": "nodemon --exec babel-node src",
     "build": "babel src --out-dir build"
   },
