@@ -20,7 +20,8 @@
   "scripts": {
     "lint": "eslint src",
     "prepublishOnly": "npm run build",
-    "start:watch": "nodemon --exec babel-node src"
+    "start:watch": "nodemon --exec babel-node src",
+    "build": "babel src --out-dir build"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.3",
