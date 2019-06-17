@@ -6,6 +6,6 @@
     "port": 8888
   },
   "logger": {
-    "info": "debug"
+    "level": "debug"
   }
 }
