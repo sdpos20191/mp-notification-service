@@ -12,15 +12,19 @@ class ConnectionHandler {
     this.client.on('close', this.onClientClose.bind(this));
     this.client.on('error', this.onClientError.bind(this));
     this.channel = await this.queue.start();
-    this.queue.onQueueMessage('ocorrencias-queue', this.onQueueMessage.bind(this));
+    const { consumerTag } = await this.queue.onQueueMessage('ocorrencias-queue', this.onQueueMessage.bind(this));
+    this.consumerTag = consumerTag;
   }
 
-  onClientClose(code, reason) {
-    console.error(code, reason)
+  async onClientClose(code, reason) {
+    this.logger.info('Disconnected');
+    this.logger.debug(`Disconnect code: ${code}`);
+    this.logger.debug(`Disconnect reason: ${reason}`);
+    await this.queue.cancelConsume(this.consumerTag);
   }
 
   onClientError(error) {
-    console.error(error);
+    this.logger.error(error.message);
   }
 
   parseBuffer(buffer) {
@@ -28,7 +32,7 @@ class ConnectionHandler {
   }
 
   onQueueMessage(msg) {
-      try {
+    try {
         const { content, fields } = msg;
         const data = this.parseBuffer(content);
         const { routingKey } = fields;

@@ -30,7 +30,7 @@ class AMQPConnection {
 
   async onQueueMessage(topic, callback) {
     await this.channel.assertQueue(topic, { durable: true });
-    await this.channel.consume(topic, callback);
+    return this.channel.consume(topic, callback);
   }
 
   async cancelConsume(consumerTag) {
